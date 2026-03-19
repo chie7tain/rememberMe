@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Contact {
+  id                String    @id @default(cuid())
+  name              String
+  nickname          String?
+  phone             String?
+  email             String?
+  birthday          DateTime?
+  birthdayYearKnown Boolean   @default(true)
+  relationshipType  String    @default("friend") // friend|family|acquaintance|partner
+  notes             String?
+  preferredContact  String    @default("text")   // call|text|email
+  photoUrl          String?
+  checkInFrequency  String    @default("monthly") // weekly|biweekly|monthly|quarterly|yearly|never
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  occasions SpecialOccasion[]
+  checkins  CheckIn[]
+}
+
+model SpecialOccasion {
+  id          String   @id @default(cuid())
+  contactId   String
+  type        String   // birthday|anniversary|graduation|work_anniversary|memorial|other
+  label       String?
+  date        DateTime
+  yearKnown   Boolean  @default(true)
+  recurring   Boolean  @default(true)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+}
+
+model CheckIn {
+  id          String   @id @default(cuid())
+  contactId   String
+  method      String   // call|text|email|in_person|social_media
+  contactedAt DateTime @default(now())
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+}
